@@ -108,7 +108,7 @@ public class JobSearchServiceImpl implements JobSearchService {
 			sql.append(" AND job.region.seq = :region ");
 		}
 		if(condiction.getYear()!=99) { //99為沒選擇, 0為不拘
-			sql.append(" AND job.experience = :year ");
+			sql.append(" AND job.experience >= :year ");
 		}
 		if (condiction.getSortColumn() != null && condiction.getSortColumn().trim().length() != 0) {
 			sql.append(" ORDER BY ");

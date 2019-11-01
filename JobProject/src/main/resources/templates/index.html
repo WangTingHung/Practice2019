@@ -250,7 +250,7 @@
 			var sortColumn = "job.seq";
 			var isASC = true;
 			$(document).ready(function(){
-				autoComplete();
+				autoComplete(); // 搜尋的下拉選單
 				
 				//準備存放類別子項目的map
 				var categoryChild = []; 
@@ -376,6 +376,7 @@
 
 			});
 			
+			/*** 儲存職我的最愛 ***/
 			function saveJobToFavorite(flag,jobSeq,obj){
 				var action = flag==true? 'off':'on';
 				$.ajax({
@@ -591,6 +592,7 @@
 				getJobList();
 			});
 			
+			/*** 薪水搜尋條件 ***/
 			$("input.money-search").blur(function(){
 				var obj = $('.container.selected-option-div').find('h5.other-options');
 				var high = moneyHigh = $('input.money-high-input').val()=='' ? 0:$('input.money-high-input').val();
@@ -674,6 +676,7 @@
 				});
 			});
 			
+			/*** 取得我的最愛 ***/
 			function getAllFavorite(){
 				console.log('getAllFavorite');
 				$.ajax({
@@ -707,6 +710,7 @@
 				});
 			}
 			
+			/*** 取得工作列表 ***/
 			function getJobList(){
 				getSearchVal();
 				$.ajax({
@@ -775,6 +779,7 @@
 				getJobList();
 			}
 			
+			/***** 條件搜尋  *****/
 			function sortAbledFunction(){
 				$(".sortColumn").css("cursor", "pointer");
 				$(document).on("click", ".sortColumn", function(){
@@ -796,6 +801,7 @@
 						desc.removeClass("default-desc");
 						$(this).append(desc);
 					}
+					pageNo = 1;
 					getJobList();
 				});
 			}
