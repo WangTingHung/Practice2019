@@ -1,0 +1,26 @@
+.margin-of-navbar{
+	margin-top: 100px;
+}
+
+.vertical_ine {
+  border-left: 6px solid green;
+  height: 200px;
+}
+
+td.rightBorder{
+	border-right: 3px solid #ddd;
+}
+
+td.paddingLeft{
+	padding-left:20px;
+}
+
+/* 讓標籤有手指*/
+.pointerStyle{
+	cursor: pointer;
+}
+
+/* 讓選擇的標籤不換行*/
+.for-one-line{
+	display: inline;
+}

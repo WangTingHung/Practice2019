@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW" xmlns:th="http://www.thymeleaf.org">
+	<head>
+		<th:block th:include="components/header :: header"></th:block>
+		<title>就業媒合網</title>
+	</head>
+	<body>
+		<th:block th:include="components/navbar :: navbar"></th:block>
+		<!-- =============== 上方搜尋條件 =========================-->
+		<div class="container">
+			<ul class="nav nav-tabs margin-of-navbar" id="myTab" role="tablist">
+				<li class="nav-item">
+					<a class="nav-link active" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">技能條件</a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link" id="profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="false">職缺條件</a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link" id="contact-tab" data-toggle="tab" href="#contact" role="tab" aria-controls="contact" aria-selected="false">其他求職條件</a>
+				</li>
+			</ul>
+			<div class="tab-content" id="myTabContent"> <!-- 上方搜尋切換列 -->
+			 	<!--技能搜尋 tab -->
+				<div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+					<div class="card mt-3">
+						<div class="card-body">
+							<div class="container mt-2">
+								<div class="row">
+									<div class="bar-query col-4ˋ">
+										<input type="text" class="form-control" id="input-search-skill"  placeholder="搜尋技能">
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<!--類別搜尋 tab -->
+				<div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+					<div class="card mt-3">
+						<div class="card-body">
+							<div class="container mt-2">
+								<button type="button" class="btn btn-light mr-1 ml-1 mb-2 category-parent-btn" th:each="category : ${categorys}" th:value="${category.seq}" th:text="${category.name}" th:id="${'category-parent-btn-'+category.seq}"></button>
+							</div>
+							<div class="container mt-2 child-category"></div>
+						</div>
+					</div>
+				</div>
+				<!--其他搜尋 tab -->
+				<div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">
+					<div class="card mt-3">
+							<div class="card-body">
+								<table style="width:100%;">
+									<tr>
+										<td class="rightBorder" style="width:50%;" >
+											<div class="container">
+												<div class="row">
+													<div class="col-2 mt-1">薪資</div>
+													<div class="col-10">
+														<div class="form-row">
+															<div class="col"><input type="text" class="form-control money-search money-low-input" data-type="low" placeholder="最低"></div>
+															<span class="pr-2 pl-2 mt-1">至</span>
+															<div class="col"><input type="text" class="form-control money-search money-high-input" data-type="high"placeholder="最高"></div>
+														</div>
+													</div>
+												</div>
+											</div>
+										</td>
+										<td class="paddingLeft">
+											<div class="container">
+													<div class="row">
+														<div class="col-2 mt-1">地區</div>
+														<div class="col-10">
+															<div class="form-row">
+																<select class="form-control" id="search-region">
+																    <option value="0">下拉選單請選擇 </option>
+																    <option th:each="region : ${regions}" th:value="${region.seq}" th:text="${region.name}"/>
+																</select>
+															</div>
+														</div>
+													</div>
+												</div>
+										</td>
+									</tr>
+									<tr class="mr-2">
+										<td class="rightBorder" style="width:50%;" >
+											<div class="container pt-2">
+												<div class="row">
+													<div class="col-2 pt-2 mt-1">年資</div>
+													<div class="col-10">
+														<div class="form-row">
+															<select id="search-year" class="form-control">
+																<option value="99">下拉選單請選擇 </option>
+																<option value="0">不拘</option>
+																<option th:each="n : ${#numbers.sequence(1,20)}" th:value="${n}" th:text="${n}+' 年以上'"/>
+															</select>
+														</div>
+													</div>
+												</div>
+											</div>
+										</td>
+										<td class="paddingLeft"></td>
+									</tr>
+								</table>
+							</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!-- =============== 中間已挑選的條件 =========================-->
+		<div class="container mt-3 selected-option-div">
+			<div class="row">
+				<div class="col-1">
+					<button type="button" class="btn btn-sm btn-danger">  重    設   </button>
+				</div>
+				<div class="col-11 mt-1 search-option-div">
+					<h5 class="skill-options for-one-line"></h5> <!-- 技術標籤 -->
+					<h5 class="category-options for-one-line"></h5><!-- 類別標籤 -->
+					<h5 class="other-options for-one-line"></h5><!-- 其他標籤 -->
+				</div>
+			</div>
+		</div>
+		<!-- =============== 下方資料列 =========================-->
+		<div class="container mt-3">
+		    <div class="row">
+		        <table class="table table-striped data-list-table">
+				  <thead>
+				    <tr>
+				      <th scope="col" class="sortColumn" data-value="job.seq">公司/職缺</th>
+				      <th scope="col" class="sortColumn" data-value="job.experience">年資</th>
+				      <th scope="col" class="sortColumn" data-value="job.salary">薪資</th>
+				      <th scope="col" class="sortColumn" data-value="job.region">地區</th>
+				      <th scope="col"></th>
+				      <th scope="col"></th>
+				    </tr>
+				  </thead>
+				  <tbody class="data-list-tbody"></tbody>
+				</table>
+		    </div>
+		</div>
+		<!--分頁 -->
+		<div class="cnt-padding">
+			<nav aria-label="Page navigation example">   
+				<ul class="pagination paginationPage justify-content-center"></ul>
+			</nav>  
+		</div> 
+		<!-- =============== sample table =========================-->
+		<table class="table sample-table d-none">
+			<tbody>
+				<tr class="sample-job-list">
+					<td class="company-jobname"  style="width:40%"></td>
+					<td class="experience"  style="width:10%"></td>
+					<td class="salary" style="width:20%"></td>
+					<td class="region" style="width:12%"></td>
+					<td class="joburl"><a href="#" class="btn btn-primary" role="button" aria-pressed="true" target="_blank">查看職缺</a></td>
+					<td class="favorite">
+						<div class="favorite-img-div img-off"><img th:src="@{/img/star_off.png}" class="rounded mx-auto d-block pointerStyle save-job save-job-false" alt="移除儲存" data-switchflag="false"></div>
+						<div class="d-none favorite-img-div img-on"><img th:src="@{/img/star_on.png}" class="rounded mx-auto d-block pointerStyle save-job save-job-true" alt="加入儲存" data-switchflag="true"></div>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+		
+		<!-- =============== 登入的 Modal  =========================-->
+		<div class="modal fade" id="loginModal" tabindex="-1" role="dialog" aria-labelledby="loginModalTitle" aria-hidden="true" data-backdrop="static">
+		  <div class="modal-dialog modal-dialog-centered" role="document">
+		    <div class="modal-content">
+		      <div class="modal-header">
+		        <h5 class="modal-title" id="loginModalTitle">登入</h5>
+		        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+		          <span aria-hidden="true">&times;</span>
+		        </button>
+		      </div>
+		      <div class="modal-body">
+				<div class="col-sm-12 col-md-12"><!-- 帳號 -->
+					<div class="form-group row">
+						<label for="addForm-others-formNo" class="col-md-4 col-form-label">帳號</label>
+						<div class="col-md-8">
+							<input type="text" class="form-control" id="login-account" placeholder="請輸入您的行動電話" maxlength="13">
+							<span class="checkData text-danger" id="addForm-others-formNo-Check"></span>
+						</div>
+					</div>
+				</div>
+				<div class="col-sm-12 col-md-12"><!-- 密碼 -->
+					<div class="form-group row">
+						<label for="addForm-others-formNo" class="col-md-4 col-form-label">密碼</label>
+						<div class="col-md-8">
+							<input name="password" type="password" class="form-control" id="login-password" aria-describedby="password" maxlength="13">
+							<span class="checkData text-danger" id="addForm-others-formNo-Check"></span>
+						</div>
+					</div>
+				</div>
+		      </div>
+		      <div class="modal-footer">
+		        <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+		        <button type="button" class="btn btn-primary" id="login-btn">登入</button>
+		      </div>
+		    </div>
+		  </div>
+		</div>
+		
+		<!-- =============== 登出的 Modal  =========================-->
+		<div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="logoutModalTitle" aria-hidden="true" data-backdrop="static">
+		  <div class="modal-dialog modal-dialog-centered" role="document">
+		    <div class="modal-content">
+		      <div class="modal-header">
+		        <h5 class="modal-title" id="logoutModalTitle">登出</h5>
+		        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+		          <span aria-hidden="true">&times;</span>
+		        </button>
+		      </div>
+		      <div class="modal-body">
+				<h4>確定要登出 ?</h4>
+		      </div>
+		      <div class="modal-footer">
+		        <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+		        <button type="button" class="btn btn-primary" id="logout-btn">登出</button>
+		      </div>
+		    </div>
+		  </div>
+		</div>
+		
+		<!-- =============== 登入登出成功 Modal  =========================-->
+		<div class="modal fade " id="dataStatusModal" tabindex="-1" role="dialog" aria-labelledby="logoutModalTitle" aria-hidden="true">
+		  <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
+		    <div class="modal-content">
+		      <div class="modal-header">
+		        <h5 class="modal-title" id="logoutModalTitle">系統訊息</h5>
+		        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+		          <span aria-hidden="true">&times;</span>
+		        </button>
+		      </div>
+		      <div class="modal-body">
+				<h4 class="data-msg"></h4>
+		      </div>
+<!-- 		      <div class="modal-footer"> -->
+<!-- 		        <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button> -->
+<!-- 		        <button type="button" class="btn btn-primary" id="logout-btn">登出</button> -->
+<!-- 		      </div> -->
+		    </div>
+		  </div>
+		</div>
+		<span class="oi oi-sort-ascending default-asc d-none"></span>
+		<span class="oi oi-sort-descending default-desc d-none"></span>
+		
+		<th:block th:include="components/footer :: footer"></th:block>
+		<script>
+			var pageNo = 1;
+			var selectCategory = new Map(); //選擇的類別
+			var searchObj = new Object();
+			var sortColumn = "job.seq";
+			var isASC = true;
+			$(document).ready(function(){
+				autoComplete();
+				
+				//準備存放類別子項目的map
+				var categoryChild = []; 
+				$('.category-parent-btn').each(function() {
+					selectCategory.set($(this).val(),categoryChild);
+				});
+				
+				var name = $('#member-name').val();
+				if(name!=''){ //session有值
+// 					getAllFavorite();
+				}else{
+					$('.nav-welcome-name').text('你好');
+					$('li.logout-li').addClass('d-none');
+					$('li.login-li').removeClass('d-none');
+				}
+				
+				initialSearchObj();
+				getJobList();
+				sortAbledFunction();
+// 				console.log(JSON.stringify(searchObj));
+			});
+			function initialSearchObj(){
+				searchObj.skills = [];
+				searchObj.categorys = [];
+				searchObj.moneyHigh = 0;
+				searchObj.moneyLow = 0;
+				searchObj.region = 0;
+				searchObj.year = 99;
+				searchObj.pageNo = pageNo;
+				searchObj.sortColumn = sortColumn;
+				searchObj.isAsc = isASC;
+			}
+			
+			/*** 取得所有搜尋值 ***/
+			function getSearchVal(){
+				var skillArry = [];
+				$('h5.skill-options').find('span').each(function() {
+					skillArry.push($(this).attr('data-seq'));
+				});
+				searchObj.skills = skillArry;
+				
+				var categoryArry = [];
+				$('h5.category-options').find('span').each(function() {
+					var parentSeq = $(this).attr('data-parentSeq');
+					categoryArry = $.merge(categoryArry,selectCategory.get(parentSeq));
+				});
+				searchObj.categorys = categoryArry;
+				
+				searchObj.moneyHigh = $('input.money-high-input').val()=='' ? 0:$('input.money-high-input').val();
+				searchObj.moneyLow = $('input.money-low-input').val()==''? 0:$('input.money-low-input').val();
+				searchObj.region = $("#search-region").find(":selected").val();
+				searchObj.year = $("#search-year").find(":selected").val();
+				searchObj.pageNo = pageNo;
+				searchObj.sortColumn = sortColumn;
+				searchObj.isAsc = isASC;
+			}
+			
+			function resetCategoryMap(){
+				var categoryChild = []; 
+				$('.category-parent-btn').each(function() {
+					selectCategory.set($(this).val(),categoryChild);
+				});
+				$('div.child-category').find('input[type="checkbox"]').prop('checked', false);
+			}
+			
+			/***  技術搜尋的下拉選單 ***/
+			function autoComplete(){
+				$( "#input-search-skill" ).on( "paste keyup", function( event ) {
+					if ( event.keyCode === $.ui.keyCode.TAB && $( this ).autocomplete( "instance" ).menu.active ) {
+						event.preventDefault();
+					}
+				}).autocomplete({
+					source: function( request, response ) {
+						$.ajax({
+							async: false,
+							method: "GET",
+							url: "/skill/searchSkills",
+							contentType : "application/x-www-form-urlencoded",
+							data : { searchText:request.term},
+						}).done(function(msg){
+							if(msg.status.code == 200){
+								// Trigger event with result data
+			   					var objArray = [];
+			   					for(var index in msg.data){
+			   						var obj = {value:msg.data[index].key, label:msg.data[index].value};
+			   						objArray.push(obj);
+			   					}
+			   					// Trigger event with result data
+			   					response(objArray);
+							}else{
+								alert("系統忙線中");
+								console.log(msg.message);
+							}
+						});
+					},
+					minLength : 1,
+					focus: function() {
+						// prevent value inserted on focus
+						return false;
+					},
+					select: function( event, ui ) {
+						$(this).val('');
+						getSearchSkill(ui.item.label,ui.item.value);
+						return false;
+// 						getSTBInfoForStbQuery(ui.item.value);
+					}
+				});			
+			}
+			function getSearchSkill(optionText,seq){ //技術點擊選項後加入標籤
+				var obj = $('.container.selected-option-div').find('h5.skill-options');
+				obj.append('<span class="badge badge-pill badge-primary mr-1 pointerStyle deleteselect" data-seq="'+seq+'">'+optionText+' X </span>');
+				pageNo = 1;
+				getJobList();
+			}
+			
+			/*** 儲存職缺切換已加入/未加入 ***/
+			$(document).on('click', 'img.save-job', function(){
+				var flag = $(this).attr('data-switchflag') == 'true'? true : false ;
+				var jobSeq = $(this).attr('data-jobseq');
+				var obj = $(this);
+				saveJobToFavorite(flag,jobSeq,obj);
+// 				saveJobToFavorite(flag,1,obj); //測試寫死
+
+			});
+			
+			function saveJobToFavorite(flag,jobSeq,obj){
+				var action = flag==true? 'off':'on';
+				$.ajax({
+					method: "GET",
+					url: "/job/addToFavorite/"+action+"/"+jobSeq,
+					contentType : "application/x-www-form-urlencoded",
+				}).done(function(msg){
+					if(msg.status.code == 200){
+						if(flag){ //已加入,切換空的
+							obj.parent('div').addClass('d-none');
+							obj.parent('div').prev('div').removeClass('d-none');
+						}else{
+							obj.parent('div').addClass('d-none');
+							obj.parent('div').next('div').removeClass('d-none');
+						}
+					}else if(msg.status.code == 401){
+						$('#dataStatusModal').find('.data-msg').text('您尚未登入');
+						$('#dataStatusModal').modal('show');
+					}else{
+						alert("系統忙線中");
+						console.log(msg.message);
+					}
+				});
+			}
+			
+			/***  移除已加入的條件(技能&職缺條件)  ***/
+			$(document).on('click', '.deleteselect', function(){
+				var parentCategory = $(this).attr('data-parentseq');
+		    	var childArr = [];
+		    	selectCategory.set(parentCategory,childArr); //清空子項目
+				$(this).remove();
+		    	var currentSeq = $('#category-child-checkAll').val();
+		    	if(currentSeq==parentCategory){
+		    		$('div.child-category').find('input[type="checkbox"]').prop('checked', false);
+		    	}
+		    	pageNo = 1;
+		    	getJobList();
+			});
+			
+			/***  移除已加入的薪水條件  ***/
+			$(document).on('click', '.mony-item', function(){
+				$('input.money-search').val('');
+				$(this).remove();
+		    	pageNo = 1;
+		    	getJobList();
+			});
+			/***  移除已加入的年資條件  ***/
+			$(document).on('click', '.year-item', function(){
+				$("select#search-year").prop('selectedIndex', 0);
+				$(this).remove();
+		    	pageNo = 1;
+		    	getJobList();
+			});
+			
+			/***  移除已加入的年資條件  ***/
+			$(document).on('click', '.region-item', function(){
+				$("select#search-region").prop('selectedIndex', 0);
+				$(this).remove();
+		    	pageNo = 1;
+		    	getJobList();
+			});
+			
+			/***  重設按鈕  ***/
+			$(document).on('click', 'button.btn-danger', function(){
+				resetCategoryMap();
+				$('div.search-option-div').find('span').remove();
+				$('#contact').find('input').val('');
+				$('#search-year option:eq(0),#search-region option:eq(0)').prop('selected', true); 
+				
+				initialSearchObj();
+				pageNo = 1;
+				getJobList();
+			});
+			
+			/*** 分類按鈕 ***/
+			$(document).on('click', 'button.category-parent-btn', function(){
+				var parentSeq = $(this).val();
+				var parentText = $(this).text();
+				$('.category-parent-btn').removeClass('disabled');
+				$(this).addClass('disabled');
+				var parentSeq = $(this).val();
+				$.ajax({
+					method: "GET",
+					url: "/category/getCategoryByParent/"+parentSeq,
+					contentType : "application/x-www-form-urlencoded",
+				}).done(function(msg){
+					if(msg.status.code == 200){
+						$('.container.child-category').children().remove();
+						var data = msg.data;
+						//全選項目
+						$('.container.child-category').append(
+							'<div class="custom-control custom-checkbox custom-control-inline mt-1">'+
+							'<input type="checkbox" class="custom-control-input checkbox-data" id="category-child-checkAll" name="child-checkAll" value="'+parentSeq+'" data-dataText="'+parentText+'">'+
+							'<label class="custom-control-label" for="category-child-checkAll">全選</label></div>'
+						);
+						//子項目
+						for(var index in data){
+							$('.container.child-category').append(
+								'<div class="custom-control custom-checkbox custom-control-inline mt-1">'+
+								'<input type="checkbox" class="custom-control-input category-child" id="category-child-'+data[index].seq+'" name="category-child-item" value="'+data[index].seq+'">'+
+								'<label class="custom-control-label" for="category-child-'+data[index].seq+'">'+data[index].name+'</label>'+
+								'</div>'
+							);
+						}
+						var selectedChildArr = selectCategory.get(parentSeq);
+						$('input[name="category-child-item"]').each(function() {
+							if(selectedChildArr.indexOf($(this).val())!= -1){
+								$(this).prop('checked', true);
+// 								selectCategory.set($(this).val(),categoryChild);
+							}
+						});
+						checkAllChecked();
+					}else{
+						alert("查無資料");
+						console.log(msg.message);
+					}
+				});
+			});
+			
+			/*** 類別全選checkbox ***/
+			$(document).on('change', '.checkbox-data', function() {
+				var parentCategory = $(this).val();
+			    if ($(".checkbox-data").is(":checked")) { //全選
+			    	$(this).parent('div').siblings().find('.category-child').prop('checked', true);
+			    	var text = $(this).attr('data-datatext');
+			    	//儲存所有子項目
+			    	var childArr = [];
+			    	$(this).parent('div').siblings().each(function() {
+			    		childArr.push($(this).find('.category-child').val());
+					});
+					selectCategory.set(parentCategory,childArr);
+					//將標籤加入
+					var pillObj = $('.container.selected-option-div').find('h5.category-options').find('span.category-item-'+parentCategory);
+					if(pillObj.length ==0){
+						var obj = $('.container.selected-option-div').find('h5.category-options');
+						obj.append('<span class="badge badge-pill badge-warning mr-1 pointerStyle deleteselect category-item-'+parentCategory+'" data-parentSeq="'+parentCategory+'">'+text+'(全選)  X </span>');
+
+					}
+			    }else { //取消全選
+			    	$(this).parent('div').siblings().find('.category-child').prop('checked', false);
+			    	var childArr = [];
+			    	selectCategory.set(parentCategory,childArr); //清空子項目
+			    	$('.container.selected-option-div').find('h5.category-options').find('span.category-item-'+parentCategory).remove();
+			    }
+			    pageNo = 1;
+			    getJobList();
+			});
+			
+			/*** 選擇子項目 ***/
+			$(document).on('click', 'input.category-child', function() {
+				var parentSeq = $('#category-child-checkAll').val();
+				var text = $('#category-child-checkAll').attr('data-datatext');
+				var childArr = selectCategory.get(parentSeq);
+				var childSeq = $(this).val();
+				if ($(this).is(":checked")) {
+					childArr.push(childSeq);
+				}else{
+					childArr.splice(childArr.indexOf(childSeq), 1);
+				}
+				checkAllChecked();//判斷是否全選
+				
+				var count = $('input[name="category-child-item"]:checked').length; //以選擇的項目
+			    var checkbox = $('input[name="category-child-item"]').length;
+				var pillObj = $('.container.selected-option-div').find('h5.category-options').find('span.category-item-'+parentSeq);//標籤物件
+				
+				if(count==0 && pillObj.length !=0){ //如果標籤有存在 & 全部選項都無勾選 => 移除標籤
+					pillObj.remove();
+				}else{ //有勾選項目 & 判斷是否有標籤 => 有標籤判斷是全選還部份選, 沒標籤長出標籤
+				    if ( count == checkbox) { //全選
+				    	if(pillObj.length ==0){
+				    		$('.container.selected-option-div').find('h5.category-options').append('<span class="badge badge-pill badge-warning mr-1 pointerStyle deleteselect category-item-'+parentSeq+'" data-parentSeq="'+parentSeq+'">'+text+'(全選)  X </span>');
+				    	}else{
+				    		pillObj.text(text+'(全部)  X ');
+				    	}
+				    }else{ //部分
+				    	if(pillObj.length ==0){
+				    		$('.container.selected-option-div').find('h5.category-options').append('<span class="badge badge-pill badge-warning mr-1 pointerStyle deleteselect category-item-'+parentSeq+'" data-parentSeq="'+parentSeq+'">'+text+'(部分)  X </span>');
+				    	}else{
+				    		pillObj.text(text+'(部分)  X ');
+				    	}
+				    }
+				}
+				pageNo = 1;
+				getJobList();
+			});
+			
+			function checkAllChecked(){
+				var count = $('input[name="category-child-item"]:checked').length; //以選擇的項目
+			    var checkbox = $('input[name="category-child-item"]').length;
+			    if ( count == checkbox) {
+			        $('#category-child-checkAll').prop('checked', true);
+			    }else {
+			    	$('#category-child-checkAll').prop('checked', false);
+			    }
+			}
+			$(document).on("change","#search-region",function(){
+				var obj = $('.container.selected-option-div').find('h5.other-options');
+				obj.find('span.region-item').remove();
+				if($(this).val()!='0'){
+					obj.append('<span class="badge badge-pill badge-success mr-1 pointerStyle deleteselect region-item">'+$("#search-region").find(":selected").text()+' X </span>');
+				}
+				pageNo = 1;
+				getJobList();
+			});
+			$(document).on("change","#search-year",function(){
+				var obj = $('.container.selected-option-div').find('h5.other-options');
+				obj.find('span.year-item').remove();
+				
+				if($(this).val()!=='99'){
+					obj.append('<span class="badge badge-pill badge-success mr-1 pointerStyle deleteselect year-item">'+$("#search-year").find(":selected").text()+' X </span>');
+				}
+				pageNo = 1;
+				getJobList();
+			});
+			
+			$("input.money-search").blur(function(){
+				var obj = $('.container.selected-option-div').find('h5.other-options');
+				var high = moneyHigh = $('input.money-high-input').val()=='' ? 0:$('input.money-high-input').val();
+				var low = moneyLow = $('input.money-low-input').val()==''? 0:$('input.money-low-input').val();
+				obj.find('span.mony-item').remove();
+				var salary;
+				if(low=='' && high!=''){
+ 					salary = high+' 以下';
+				}
+				if(high!='' && low!=''){
+					salary = low+" ~ "+high;
+				}
+				if(low!='' && high==''){
+					salary = low+' 以上';
+				}
+				if(high!=0 ||low!=0){
+					obj.append('<span class="badge badge-pill badge-success mr-1 pointerStyle mony-item">'+salary+' X </span>');
+				}
+				pageNo = 1;
+				getJobList();
+			});
+			
+			/*** 登入 ***/
+			$(document).on('click', '#login-btn', function() {
+				$.ajax({
+					method: "GET",
+					url: "/member/login",
+					contentType : "application/x-www-form-urlencoded",
+				}).done(function(msg){
+					console.log(msg);
+					if(msg.status.code == 200){
+						$('#loginModal').modal('hide');
+						$('#dataStatusModal').find('.data-msg').text('登入成功');
+						$('#dataStatusModal').modal('show');
+						$('#loginModal').find('input').val('');
+						//姓名 & 登出show
+						var name = msg.message;
+						console.log('name:',name);
+						$('#member-name').val(msg.message);
+						$('.nav-welcome-name').text(name+' 你好');
+						$('li.logout-li').removeClass('d-none');
+						$('li.login-li').addClass('d-none');
+						
+						//已加入與未加入
+						$('div.favorite-img-div').addClass('d-none');
+						$('div.img-off').removeClass('d-none');
+						var data = msg.data;
+						for(var key in data){
+							$('#favorite-off-img-'+data[key]).addClass('d-none');
+							$('#favorite-on-img-'+data[key]).removeClass('d-none');
+						}
+					}else{
+						alert("系統忙線中");
+						console.log(msg.message);
+					}
+				});
+			});
+			
+			$(document).on('click', '#logout-btn', function() {
+				$.ajax({
+					method: "GET",
+					url: "/member/logout",
+					contentType : "application/x-www-form-urlencoded",
+				}).done(function(msg){
+					console.log(msg);
+					if(msg.status.code == 200){
+						$('#logoutModal').modal('hide');
+						$('#dataStatusModal').find('.data-msg').text('登出成功');
+						$('#dataStatusModal').modal('show');
+// 						$('span.nav-welcome-name').addClass('d-none');
+						$('.nav-welcome-name').text('你好');
+						$('li.logout-li').addClass('d-none');
+						$('li.login-li').removeClass('d-none');
+						
+						$('div.favorite-img-div').addClass('d-none');
+						$('div.img-off').removeClass('d-none');
+					}else{
+						alert("系統忙線中");
+						console.log(msg.message);
+					}
+				});
+			});
+			
+			function getAllFavorite(){
+				console.log('getAllFavorite');
+				$.ajax({
+					method: "GET",
+					url: "/job/getAllFavorite",
+					contentType : "application/x-www-form-urlencoded",
+				}).done(function(msg){
+					console.log(msg);
+					if(msg.status.code == 200){
+						
+						//姓名 & 登出show
+						var name = msg.message;
+						console.log('name:',name);
+						$('#member-name').val(msg.data.message);
+						$('.nav-welcome-name').text(name+' 你好');
+						$('li.logout-li').removeClass('d-none');
+						$('li.login-li').addClass('d-none');
+						
+						//已加入與未加入
+						$('div.favorite-img-div').addClass('d-none');
+						$('div.img-off').removeClass('d-none');
+						var data = msg.data;
+						for(var key in data){
+							$('#favorite-off-img-'+data[key]).addClass('d-none');
+							$('#favorite-on-img-'+data[key]).removeClass('d-none');
+						}
+					}else{
+						alert("系統忙線中");
+						console.log(msg.message);
+					}
+				});
+			}
+			
+			function getJobList(){
+				getSearchVal();
+				$.ajax({
+					method : "POST",
+					url : "/job/jobs",
+					contentType : "application/json; charset=utf8",
+					data : JSON.stringify(searchObj)
+// 					data : searchObj
+				}).done(function(msg) {
+					console.log(msg);
+					var appendObj = $('tbody.data-list-tbody');
+					appendObj.find('tr').remove();
+					var list = msg.data.resultList;
+   					for(var key in list){
+   						var obj = list[key];
+   						var trobj = $('table.sample-table').find('tr.sample-job-list').clone();
+   		   				trobj.removeClass('.sample-job-list');
+   		   				
+   	   					trobj.find("td.company-jobname").html('<b>'+obj.job+'</b><br>'+'<span>'+obj.company+'</span>');
+   	   					
+   	   					var experience = obj.experience;
+   	   					if(experience==0){
+	   	   					trobj.find("td.experience").text("不拘");
+   	   					}else{
+	   	   					trobj.find("td.experience").text(obj.experience+" 以上");
+   	   					}
+   	   					
+   	   					var high = obj.salaryHigh;
+   	   					var low = obj.salaryLow;
+   	   					var salary;
+   	   					if(high==0 && low==0 ){
+   	   						salary = '面議'; 
+   	   					}
+   	   					if(low==0 && high!=0){
+   	   						salary = high+' 以下';
+   	   						
+   	   					}
+   	   					if(high!==0 && low!==0){
+   	   						salary = low+" ~ "+high;
+   	   					}
+   	   					if(low!=0 && high==0){
+   	   						salary = low+' 以上';
+   	   					}
+   	   					trobj.find("td.salary").text(salary);
+   	   					trobj.find("td.region").text(obj.region);
+   	   					trobj.find("td.joburl").find('a').attr('href','http://'+obj.url);
+   	   					trobj.find("td.favorite").find('div.img-off').attr('id','favorite-off-img-'+obj.seq);
+   	   					trobj.find("td.favorite").find('div.img-on').attr('id','favorite-on-img-'+obj.seq);
+   	   					trobj.find("td.favorite").find('img').attr('data-jobseq',obj.seq);
+
+   	   					trobj.removeClass();
+   	   					appendObj.append(trobj);
+   					}
+   					
+   					//如果有登入更新我的最愛
+   					if(msg.message != null){ 
+	   					getAllFavorite();
+	   				}
+				    $("ul.pagination").generatePageBean(msg.data, 10 ,'第 '+msg.data.pageNo+' 頁 - 共 '+msg.data.dbCount+' 筆', triggerMethod);
+				});
+			}
+			
+			/***** for switchPage*****/
+			function triggerMethod(index){
+				pageNo = index;
+				getJobList();
+			}
+			
+			function sortAbledFunction(){
+				$(".sortColumn").css("cursor", "pointer");
+				$(document).on("click", ".sortColumn", function(){
+					$(document).find("th .oi-sort-ascending").remove();
+					$(document).find("th .oi-sort-descending").remove();
+					
+					if(sortColumn == $(this).attr("data-value")){
+						isASC = !isASC;
+					}else{
+						sortColumn = $(this).attr("data-value");
+					}
+					
+					if(isASC){
+						var dAsc = $(".default-asc").clone().removeClass("d-none");
+						dAsc.removeClass("default-asc");
+						$(this).append(dAsc);
+					}else{
+						var desc = $(".default-desc").clone().removeClass("d-none");
+						desc.removeClass("default-desc");
+						$(this).append(desc);
+					}
+					getJobList();
+				});
+			}
+		</script>
+	</body>
+</html>
